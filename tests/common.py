@@ -625,8 +625,7 @@ class RunnerCore(unittest.TestCase, metaclass=RunnerMeta):
 
   def run_js(self, filename, engine=None, args=[], output_nicerizer=None, assert_returncode=0):
     # use files, as PIPE can get too full and hang us
-    stdout = self.in_dir('stdout')
-    stderr = self.in_dir('stderr')
+    output = self.in_dir('output')
     error = None
     if not engine:
       engine = self.js_engines[0]
@@ -638,8 +637,8 @@ class RunnerCore(unittest.TestCase, metaclass=RunnerMeta):
       print(f"Running '{filename}' under '{shared.shlex_join(engine)}'")
     try:
       jsrun.run_js(filename, engine, args,
-                   stdout=open(stdout, 'w'),
-                   stderr=open(stderr, 'w'),
+                   stdout=open(output, 'w'),
+                   stderr=STDOUT,
                    assert_returncode=assert_returncode)
     except subprocess.CalledProcessError as e:
       error = e
@@ -648,12 +647,9 @@ class RunnerCore(unittest.TestCase, metaclass=RunnerMeta):
     if not filename.endswith('.wasm'):
       self.assertEqual(line_endings.check_line_endings(filename), 0)
 
-    out = read_file(stdout)
-    err = read_file(stderr)
+    ret = read_file(output)
     if output_nicerizer:
-      ret = output_nicerizer(out, err)
-    else:
-      ret = out + err
+      ret = output_nicerizer(ret)
     if error or EMTEST_VERBOSE:
       ret = limit_size(ret)
       print('-- begin program output --')
