@@ -357,7 +357,7 @@ def lld_flags_for_executable(external_symbols):
       f.write('\n'.join(external_symbols))
     cmd.append('--allow-undefined-file=%s' % undefs)
   else:
-    cmd.append('--allow-undefined')
+    cmd.append('--import-undefined')
 
   if settings.IMPORTED_MEMORY:
     cmd.append('--import-memory')
